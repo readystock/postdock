@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: noah-postgres
+  labels:
+    app: noah-postgres
+spec:
+  serviceName: noah-postgres
+  replicas: 3
+  selector:
+    matchLabels:
+      app: noah-postgres
+  template:
+    metadata:
+      labels:
+        app: noah-postgres
+    spec:
+      terminationGracePeriodSeconds: 1800
+      containers:
+        - name: noah-postgres
+          image: noah-postgres:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5432
+              name: pgwire
+          resources:
+            limits:
+              cpu: "500m"
+              memory: 1Gi
+            requests:
+              cpu: "500m"
+              memory: 1Gi
+          securityContext:
+            capabilities:
+              add:
+                - IPC_LOCK
+          # These volume mounts are persistent. They are like inline claims,
+          # but not exactly because the names need to match exactly one of
+          # the stateful pod volumes.
+          volumeMounts:
+            - name: noah-postgres-data
+              mountPath: /postgres_data
+  # These are converted to volume claims by the controller
+  # and mounted at the paths mentioned above.
+  # do not use these in production until ssd GCEPersistentDisk or other ssd pd
+  volumeClaimTemplates:
+    - metadata:
+        name: noah-postgres-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: fast
+        resources:
+          requests:
+            storage: 1Gi
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: fast
+provisioner: k8s.io/minikube-hostpath
+parameters:
+  type: pd-ssd
