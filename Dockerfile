@@ -31,7 +31,7 @@ RUN groupadd -g 999 postdb && \
 RUN chown -R postdb /db
 RUN chmod -R 750 /db
 USER postdb
+RUN /postgres/bin/initdb -D /db
 COPY ./pg_hba.conf /db/pg_hba.conf
 COPY ./postgresql.conf /db/postgresql.conf
-RUN /postgres/bin/initdb -D /db
 CMD ["/postgres/bin/postgres", "-D", "/db"]
