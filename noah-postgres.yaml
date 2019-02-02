@@ -5,20 +5,20 @@ metadata:
   labels:
     app: noah-postgres
 spec:
-  serviceName: noah-postgres
+  serviceName: noah-data-node
   replicas: 3
   selector:
     matchLabels:
-      app: noah-postgres
+      app: noah-data-node
   template:
     metadata:
       labels:
-        app: noah-postgres
+        app: noah-data-node
     spec:
       terminationGracePeriodSeconds: 1800
       containers:
-        - name: noah-postgres
-          image: noah-postgres:latest
+        - name: noah-data-node
+          image: noah-data-node:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 5432
